@@ -1,0 +1,22 @@
+{
+  "sharedDir": "include",
+  "dependenciesDir": "extern",
+  "info": {
+    "name": "openssl",
+    "id": "openssl",
+    "version": "0.0.1",
+    "url": "https://github.com/Fernthedev/openssl-curl-android",
+    "additionalData": {
+      "staticLinking": true,
+      "overrideSoName": "libopenssl.a",
+      "compileOptions": {
+        "systemIncludes": [
+          "fruit/include/",
+          "include/"
+        ]
+      }
+    }
+  },
+  "dependencies": [],
+  "additionalData": {}
+}
