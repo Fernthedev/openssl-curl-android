@@ -11,7 +11,7 @@ jobs:
 
     env:
       module_id: ssl
-      build_path: openssh/build/arm64-v8a/lib
+      build_path: openssl/build/arm64-v8a/lib
 
     steps:
       - uses: actions/checkout@v2
