@@ -1,5 +1,5 @@
 {
-  "sharedDir": "openssh/include",
+  "sharedDir": "openssl/include",
   "dependenciesDir": "extern",
   "info": {
     "name": "openssl",
