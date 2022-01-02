@@ -50,7 +50,9 @@ jobs:
 
     steps:
       - name: Copy qpm.json
-        run: cp ./openssl_qpm.json ./qpm.json
+        run: |
+          cd ${GITHUB_WORKSPACE}
+          cp ./openssl_qpm.json ./qpm.json
 
       - name: Get Tag Version
         id: get_tag_version
@@ -127,7 +129,7 @@ jobs:
       - name: Get Library Name
         id: libname
         run: |
-          cd ${build_path}
+          cd ${GITHUB_WORKSPACE}/${build_path}
           pattern="lib${module_id}*.a"
           files=( $pattern )
           echo ::set-output name=NAME::"${files[0]}"
