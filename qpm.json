@@ -8,7 +8,9 @@
     "url": "https://github.com/Fernthedev/openssl-curl-android",
     "additionalData": {
       "staticLinking": true,
-      "overrideSoName": "libssl.a"
+      "soLink": "https://github.com/Fernthedev/openssl-curl-android/releases/download/v7.78.0/libssl.a",
+      "overrideSoName": "libssl.a",
+      "branchName": "version-ssl-v7.78.0"
     }
   },
   "dependencies": [],
