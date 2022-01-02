@@ -43,14 +43,65 @@ jobs:
           export NDK=${{ steps.setup-ndk.outputs.ndk-path }}
           ./qpm_build.sh
 
+      - name: Get Tag Version
+        id: get_tag_version
+        run: |
+          echo ${GITHUB_REF#refs/tags/}
+          echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
+          echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/v}
 
-  # publish_libs:
+      # Get release that was created for this tag
+      - name: Get Release
+        uses: octokit/request-action@v2.x
+        id: get_release
+        with:
+          route: GET /repos/:repository/releases/tags/${{ steps.get_tag_version.outputs.TAG }}
+          repository: ${{ github.repository }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  #   runs-on: ubuntu-latest
-  #   needs: build
-  #   # TODO: Matrix for libcurl
+      - name: Get Release Upload URL
+        id: get_upload_url
+        run: |
+          url=$(echo "$response" | jq -r '.upload_url')
+          echo $url
+          echo "::set-output name=upload_url::$url"
+        env:
+          response: ${{ steps.get_release.outputs.data }}
 
-  #   steps:
+      # Upload our release assets
+      - name: Upload ssl Release Asset
+        id: upload_ssl_release_asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_upload_url.outputs.upload_url }}
+          asset_path: ./build/openssl/arm64-v8a/lib/libssl.a
+          asset_name: libssl.a
+          asset_content_type: application/octet-stream
+
+      # Upload our release assets
+      - name: Upload curl Release Asset
+        id: upload_curl_release_asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_upload_url.outputs.upload_url }}
+          asset_path: ./build/curl/arm64-v8a/lib/libcurl.a
+          asset_name: libcurl.a
+          asset_content_type: application/octet-stream
+
+  publish_libs:
+    env:
+      module_id: ssl
+      build_path: openssl/build/arm64-v8a/lib
+    runs-on: ubuntu-latest
+    needs: build
+    # TODO: Matrix for libcurl
+
+    steps:
       - name: Copy qpm.json
         run: |
           cd ${GITHUB_WORKSPACE}
@@ -150,7 +201,7 @@ jobs:
       - name: Change QPM Package Info
         run: |
           ./QPM/qpm-rust package edit-extra --branchName "version-${module_id}-${{ steps.get_tag_version.outputs.TAG }}"
-          ./QPM/qpm-rust package edit-extra --soLink "${{ steps.upload_release_asset.outputs.browser_download_url }}"
+          ./QPM/qpm-rust package edit-extra --soLink "${{ jobs.build.steps.upload_${module_id}_release_asset.outputs.browser_download_url }}"
 
       - name: Commit Changed package info
         run: |
